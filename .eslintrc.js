@@ -1,5 +1,8 @@
 module.exports = {
   "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+  },
   "extends": "airbnb",
   "plugins": [ "react", "jsx-a11y", "import", "flowtype" ],
   "rules": {

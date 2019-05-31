@@ -1,7 +1,5 @@
 import React from 'react'
-import Link from 'next/link'
 import io from 'socket.io-client'
-
 import Head from '../src/components/head'
 import Nav from '../src/components/nav'
 import Video from '../src/components/video'
@@ -10,8 +8,6 @@ class Chat extends React.Component {
   socket = null
 
   video = null
-
-  another = null
 
   peer = null
 
@@ -30,20 +26,18 @@ class Chat extends React.Component {
 
   componentDidMount() {
     this.video = document.getElementById('myelement')
-    this.another = document.getElementById('anotherelement')
 
-    navigator.mediaDevices.getDisplayMedia({
+    navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     })
       .then((mediaStream) => {
-        console.log(mediaStream)
         this.setState({ mediaStream })
         this.socket = io()
         this.socket.on('connect', () => {
           const options = {
-            host: location.hostname,
-            port: location.port,
+            host: window.location.hostname,
+            port: window.location.port,
             path: '/api',
           }
           this.peer = new Peer(this.socket.id, options)
@@ -67,12 +61,35 @@ class Chat extends React.Component {
             }
             call.on('stream', (remoteStream) => {
               const { remoteStreams } = this.state
-              remoteStreams.push({
-                id: key,
-                stream: remoteStream,
-              })
-              console.log(remoteStreams)
+              console.log('connect remotestreams', remoteStreams)
+              const findex = remoteStreams.findIndex(st => st.id === key)
+              if (findex === -1) {
+                remoteStreams.push({
+                  id: key,
+                  stream: remoteStream,
+                })
+              }
+              else {
+                remoteStreams[findex] = {
+                  id: key,
+                  stream: remoteStream,
+                }
+              }
               this.setState({ remoteStreams })
+            })
+          })
+        })
+
+        this.socket.on('deleteKeys', (keys) => {
+          const { remoteStreams } = this.state
+          console.log('disconnect remotestreams', remoteStreams)
+          keys.map((key) => {
+            remoteStreams.forEach((stream, index) => {
+              if (stream.id === key) {
+                console.log('delete', key)
+                remoteStreams.splice(index, 1)
+                this.setState({ remoteStreams })
+              }
             })
           })
         })
@@ -98,12 +115,13 @@ class Chat extends React.Component {
       mediaStream,
       remoteStreams,
     } = this.state
+    console.log(!socketId)
     return (
       <div>
         <Head title="Chat" />
         <Nav />
-        <Video id={socketId} stream={mediaStream} width={{ width: '30%' }} />
-        { remoteStreams.map(stream => <Video id={stream.id} stream={stream.stream} width={{ width: '50%' }} />)}
+        <Video id={socketId} stream={mediaStream} width={{ width: '20%' }} />
+        { remoteStreams.map(stream => <Video id={stream.id} stream={stream.stream} width={{ width: '40%' }} />)}
         <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js" />
       </div>
     )
