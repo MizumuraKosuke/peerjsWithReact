@@ -8,7 +8,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "net": "^1.0.2",
-    "next": "^8.1.0",
+    "next": "^11.1.3",
     "peer": "^0.2.10",
     "peerjs": "^1.0.0",
     "peerjs-client": "^0.3.15",
